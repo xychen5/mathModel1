@@ -25,10 +25,11 @@ def loadStandardRange(filePath):
     with open(filePath) as f:
         lines = f.readlines()
         #lines = []
-        posPointRange = {}
         #maxR = -1000000000000
         #minR = 1000000000000
         for line in lines:
+            line = line.strip('\n')
+            posPointRange = {}
             newl = line.split(" ")
             posPointRange["idx"] = int(newl[0])
             posPointRange["enName"] = newl[1]
@@ -68,7 +69,7 @@ def loadStandardRange(filePath):
             #print(extremums)
             STANDARDRANGE[newl[1]] = posPointRange
         #print("range is: ", minR , " -> ", maxR)
-        #print(STANDARDRANGE)
+        print(STANDARDRANGE)
 
 
 # load columns from file
@@ -84,18 +85,19 @@ def loadColumnsInfo(filePath):
     with open(filePath) as f:
         lines = f.readlines()
         for i in range(len(lines)):
+            lines[i] = lines[i].strip('\n')
             allLines.append(lines[i].split(" "))
     #print(allLines)
     #print("column lines is: %d" % (len(lines)))
     for i in range(len(allLines[0])):
         columnName = {}
-        print(allLines[0][0], allLines[0][1])
-        columnName["cnName"] = allLines[0][1]
-        columnName["enName"] = allLines[1][i]
+        #print(allLines[0][0], allLines[0][1])
+        columnName["cnName"] = allLines[1][i]
+        columnName["enName"] = allLines[0][i]
         columnName["columnIdx"] = i
         tmpColumnsInfo.append(columnName)
     COLUMNNUM = len(tmpColumnsInfo)
-    print(tmpColumnsInfo)
+    #print(tmpColumnsInfo)
     return tmpColumnsInfo
 
 
@@ -109,18 +111,25 @@ def loadRawData(filePath):
     allItems = []
     with open(filePath) as f:
         lines = f.readlines()
+        global LINENUM
         LINENUM = len(lines)
         for line in lines:
+            line = line.strip('\n')
             allItems.append(line.split(" "))
+    global COLUMNNUM
     COLUMNNUM = len(allItems[0])
     #print(allItems)
     storeByColumn = []
     for j in range(COLUMNNUM):
         columnData = []
         for i in range(LINENUM):
-            columnData.append(allItems[i][j])
+            if j == 0:
+                columnData.append(allItems[i][j])
+            else:
+                columnData.append(float(allItems[i][j]))
         storeByColumn.append(columnData)
     #print("data is", storeByColumn)
+    #print(LINENUM, " ", COLUMNNUM)
     return storeByColumn
 
 # load
@@ -130,10 +139,10 @@ class RawData:
     def __init__(self, columnsInfoFilePath, dataFilePath, stdRangeFilePath, defectiveThreshold):
         """
         init the raw data into RawData
-        :param columnsInfoFilePath:
-        :param dataFilePath:
-        :param stdRangeFilePath:
-        :param defectiveThreshold:
+        :param columnsInfoFilePath: 列信息文件
+        :param dataFilePath: 数据文件
+        :param stdRangeFilePath: 标准范围文件
+        :param defectiveThreshold: 数据缺陷比例阈值
         """
         # initial COLUMNNUM
         self.rawDataColumnsInfo = loadColumnsInfo(columnsInfoFilePath)
@@ -151,12 +160,14 @@ class RawData:
         # load std range
         loadStandardRange(stdRangeFilePath)
         # initial virables
+        # attention: the first column of dataByColumn is time, so, dicsize of dataBycolumn is 355
         for columnInfo in self.rawDataColumnsInfo:
-            self.rawData[columnInfo["enName"]] = self.dataByColumn[columnInfo["columnIdx"]]
+            self.rawData[columnInfo["enName"]] = self.dataByColumn[columnInfo["columnIdx"] + 1]
             self.defectRatio[columnInfo["enName"]] = 1
 
         # according to the stdRange, set somevalue to NULLFLAG
         for optValueName in self.rawData.keys():
+            #print(STANDARDRANGE[optValueName])
             maxOpt = STANDARDRANGE[optValueName]["max"]
             minOpt = STANDARDRANGE[optValueName]["min"]
             defectiveValueNum = 0
@@ -189,8 +200,38 @@ class RawData:
 if __name__ == "__main__":
     print("hello")
     #loadStandardRange("rawData/standardRange.dat")
-    #loadColumnsInfo("rawData/columesInfo.dat")
+    #loadColumnsInfo("rawData/columnsInfo.dat")
     #loadRawData("rawData/raw285.dat")
-    data285 = RawData()
+    data285 = RawData(
+        "rawData/columnsInfo.csv",
+        "rawData/raw285.dat",
+        "rawData/standardRange.dat",
+        0.25
+    )
+    data313 = RawData(
+        "rawData/columnsInfo.csv",
+        "rawData/raw313.dat",
+        "rawData/standardRange.dat",
+        0.25
+    )
+    # print the 354 option value of sample 285 and 313
+    nonOptValue285 = "285 2017/7/17 8:00:00 199 89.3 60.06 14.93 25.02 53 726.5 3.2 88.1 1.2 3.61 4.8 1.25 3.37"
+    optValue285 = ""
+    nonOptValue313 = "313 2017/5/15 8:00:00 392 90.3 55.05 20.89 24.06 59.09 725.2 8.5 88.9 1.4 3.77 9.24 3.45 7.29"
+    optValue313 = ""
+    for optKey in data285.res.keys():
+        optValue285 = optValue285 + str(data285.res[optKey]) + " "
+    for optKey in data313.res.keys():
+        optValue313 = optValue313 + str(data313.res[optKey]) + " "
+    with open("resSampleData/res285.csv", "w") as f:
+        f.writelines(optValue285)
+    with open("resSampleData/res313.csv", "w") as f:
+        f.writelines(optValue313)
+    print(optValue285, "\n", optValue313)
+    print(nonOptValue285 + optValue285, "\n", nonOptValue313 + optValue285)
+
+#285 2017/7/17 8:00:00 199 89.3 60.06 14.93 25.02 53 726.5 3.2 88.1 1.2 3.61 4.8 1.25 3.37
+#313 2017/5/15 8:00:00 392 90.3 55.05 20.89 24.06 59.09 725.2 8.5 88.9 1.4 3.77 9.24 3.45 7.29
+
 
 
