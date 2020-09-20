@@ -21,13 +21,16 @@ lr = Ridge(alpha=100000, fit_intercept=True, normalize=True,
 
 # estimator=LinearRegression(),  # 选择lin线性回归为基模型
 rfe = RFE(
-    estimator=LinearRegression(normalize=True),
-    n_features_to_select=39  # 选区特征数
+    #estimator=LinearRegression(normalize=True),
+    estimator=Lasso(normalize=True),
+    #estimator=lr,
+    n_features_to_select=29  # 选区特征数
 )
 
 # 由于选择了一个目标，导致geature中实际上只有 367 = 366 - 1 列
 # fit 方法训练选择特征属性
-sFeature = rfe.fit_transform(feature, data["RON损失（不是变量）"])
+#sFeature = rfe.fit_transform(feature, data["RON损失（不是变量）"])
+sFeature = rfe.fit_transform(feature, data[["RON损失（不是变量）"]])
 
 # 2d matrix: clonum: opt Value, row:
 FRMatrix = sFeature.tolist()
@@ -54,7 +57,7 @@ for i in range(len(rawColumnsInfo)):
         chosenCnName.append(rawColumnsInfo[i]["cnName"])
 
 # write the chosen flags into file
-with open("demensionDecrease/chosenOptValues_rfeLinear.csv", "w") as f:
+with open("demensionDecrease/chosenOptValues_rfeLasso.csv", "w") as f:
     for i in chosenIndex:
         f.write(str(i) + " ")
     f.write("\n")

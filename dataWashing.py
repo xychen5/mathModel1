@@ -202,6 +202,7 @@ if __name__ == "__main__":
     #loadStandardRange("rawData/standardRange.dat")
     #loadColumnsInfo("rawData/columnsInfo.dat")
     #loadRawData("rawData/raw285.dat")
+
     data285 = RawData(
         "rawData/columnsInfo.csv",
         "rawData/raw285.dat",
@@ -223,12 +224,27 @@ if __name__ == "__main__":
         optValue285 = optValue285 + str(data285.res[optKey]) + " "
     for optKey in data313.res.keys():
         optValue313 = optValue313 + str(data313.res[optKey]) + " "
-    with open("resSampleData/res285.csv", "w") as f:
-        f.writelines(optValue285)
-    with open("resSampleData/res313.csv", "w") as f:
-        f.writelines(optValue313)
+    #with open("resSampleData/res285.csv", "w") as f:
+    #    f.writelines(optValue285)
+    #with open("resSampleData/res313.csv", "w") as f:
+    #    f.writelines(optValue313)
     print(optValue285, "\n", optValue313)
     print(nonOptValue285 + optValue285, "\n", nonOptValue313 + optValue285)
+
+    # feature List:
+    featureList = [32,46,64,71,87,90,95,96,111,158,164,168,170,174,180,187,188,225,229,235,242,246,255,258,319,346,347,348]
+    fi = 0
+    ki = 1
+    fMins = []
+    fMaxs = []
+    for key in STANDARDRANGE.keys():
+        if fi == len(featureList):
+            break
+        if featureList[fi] == ki + 16:
+            fi = fi + 1
+            print(STANDARDRANGE[key]["min"], " ", STANDARDRANGE[key]["max"])
+
+        ki = ki + 1
 
 #285 2017/7/17 8:00:00 199 89.3 60.06 14.93 25.02 53 726.5 3.2 88.1 1.2 3.61 4.8 1.25 3.37
 #313 2017/5/15 8:00:00 392 90.3 55.05 20.89 24.06 59.09 725.2 8.5 88.9 1.4 3.77 9.24 3.45 7.29
