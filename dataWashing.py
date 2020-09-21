@@ -132,7 +132,6 @@ def loadRawData(filePath):
     #print(LINENUM, " ", COLUMNNUM)
     return storeByColumn
 
-# load
 
 # rawData: store by column
 class RawData:
@@ -197,6 +196,22 @@ class RawData:
             # cal Avg of this column and get the self.res
             self.res[optValueName] = np.mean(self.rawData[optValueName])
 
+
+# print the chosen features's name by indexes
+def printChosenFeaturesInfo(indexes):
+    rawColumnsInfo = loadColumnsInfo("sampleData/allCloumnInfo_en_cn.csv")
+    for i in indexes:
+        # the given indexes start from 1
+        print(i, " ", rawColumnsInfo[i - 1]["enName"], " ", rawColumnsInfo[i]["cnName"])
+
+# print the chosen features's least delta
+def printChosenFeaturesLeastDelta(indexes):
+    rawColumnsInfo = loadColumnsInfo("sampleData/allCloumnInfo_en_cn.csv")
+    #loadStandardRange("rawData/standardRange.dat") already done in main's RawData Class
+    for i in indexes:
+        # print the feature's least delta who's enName is rawColumnsInfo[i - 1]["enName"]
+        print(STANDARDRANGE[rawColumnsInfo[i - 1]["enName"]])#['delta'])
+
 if __name__ == "__main__":
     print("hello")
     #loadStandardRange("rawData/standardRange.dat")
@@ -231,8 +246,9 @@ if __name__ == "__main__":
     print(optValue285, "\n", optValue313)
     print(nonOptValue285 + optValue285, "\n", nonOptValue313 + optValue285)
 
-    # feature List:
-    featureList = [32,46,64,71,87,90,95,96,111,158,164,168,170,174,180,187,188,225,229,235,242,246,255,258,319,346,347,348]
+    # print the range of each feature:
+    # 79: only: ronLoss: featureList = [32,46,64,71,87,90,95,96,111,158,164,168,170,174,180,187,188,225,229,235,242,246,255,258,319,346,347,348]
+    featureList = [17,31,49,56,72,75,80,81,96,143,149,153,155,159,165,172,173,210,214,227,231,240,243,301,332,333,356]
     fi = 0
     ki = 1
     fMins = []
@@ -243,8 +259,10 @@ if __name__ == "__main__":
         if featureList[fi] == ki + 16:
             fi = fi + 1
             print(STANDARDRANGE[key]["min"], " ", STANDARDRANGE[key]["max"])
-
         ki = ki + 1
+
+    printChosenFeaturesInfo(featureList)
+    printChosenFeaturesLeastDelta(featureList)
 
 #285 2017/7/17 8:00:00 199 89.3 60.06 14.93 25.02 53 726.5 3.2 88.1 1.2 3.61 4.8 1.25 3.37
 #313 2017/5/15 8:00:00 392 90.3 55.05 20.89 24.06 59.09 725.2 8.5 88.9 1.4 3.77 9.24 3.45 7.29
